@@ -7,6 +7,7 @@ namespace Drones.ViewModels.DTOs
 {
     public class DroneDTO
     {
+        public int droneId { get; set; }
         public string serialNumber { get; set; }
 
         public int model { get; set; }
@@ -17,5 +18,7 @@ namespace Drones.ViewModels.DTOs
         public int state { get; set; }
 
         public string stateName { get; set; }
+        public double batteryLevel { get; set; }
+
     }
 }

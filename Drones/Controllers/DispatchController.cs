@@ -54,7 +54,7 @@ namespace Drones.Controllers
       
         [HttpGet]
         [Route("get-registered-drones")]
-        public IActionResult GetUAllDrones()
+        public IActionResult GetAllDrones()
         {
             var response = repo.GetAllDrones();
 

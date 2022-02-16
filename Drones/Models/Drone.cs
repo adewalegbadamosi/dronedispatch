@@ -21,11 +21,13 @@ namespace Drones.Models
 
         public double BatteryCapacity { get; set; }
         public int State { get; set; }
+        public double BatteryLevel { get; set; }
+
 
 
     }
 
-   
+
 
 
 

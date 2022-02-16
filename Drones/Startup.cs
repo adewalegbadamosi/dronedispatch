@@ -60,6 +60,7 @@ namespace Drones
             #region Repositories            
             
             services.AddTransient<IDispatchRepository, DispatchRepository>();
+            services.AddTransient<IAuditTrailRepository, AuditTrailRepository>();
             #endregion
 
         }
