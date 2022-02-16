@@ -15,6 +15,8 @@ using Drones.Context;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.InMemory;
 using Drones.Models;
+using Drones.Interfaces;
+using Drones.Repository;
 
 namespace Drones
 {
@@ -35,6 +37,10 @@ namespace Drones
             services.AddDbContext<ApplicationContext>(opt => opt.UseInMemoryDatabase(databaseName: "DroneDispatchDb")); 
 
             
+            //services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnectionString")));
+            //var conString = Configuration.GetConnectionString("DbConnectionString");
+            //services.AddDbContext<DataContext>(options => options.UseMySql(conString, ServerVersion.AutoDetect(conString)));
+
             services.AddControllers();
 
             //services.AddMvc();
@@ -50,6 +56,11 @@ namespace Drones
                 });
                
             });
+
+            #region Repositories            
+            
+            services.AddTransient<IDispatchRepository, DispatchRepository>();
+            #endregion
 
         }
 
@@ -68,18 +79,19 @@ namespace Drones
 
             app.UseAuthorization();
 
-            loggerFactory.CreateLogger(Configuration.GetSection("Logging:LogLevel").Value);
+            //loggerFactory.CreateLogger(Configuration.GetSection("Logging:LogLevel").Value);
             
-            var context = app.ApplicationServices.GetService<ApplicationContext>();
-            
+
+            //var context = app.ApplicationServices.GetService<ApplicationContext>();
+            //AddTestData(context);
 
             app.UseEndpoints(endpoints =>
             {
-               // endpoints.MapControllers();
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Drone}/{action=Index}/{id?}"
-                    );
+                endpoints.MapControllers();
+                //endpoints.MapControllerRoute(
+                //    name: "default",
+                //    pattern: "{controller=Dispatch}/{action=InitializeDb}/{id?}"
+                //    );
             });
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -100,6 +112,8 @@ namespace Drones
         }
 
        
+
+
 
     }
 }
