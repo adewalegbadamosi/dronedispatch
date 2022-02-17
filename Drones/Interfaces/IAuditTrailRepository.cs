@@ -1,4 +1,4 @@
-﻿
+﻿using Drones.Context;
 using Drones.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace Drones.Interfaces
 {
     public interface IAuditTrailRepository
     {
-        Task<bool> AddAuditTrail(AuditViewModel model);
+        void AddAuditTrail(AuditViewModel model);
         IEnumerable<AuditViewModel> CheckDroneBatteryLevelLog();
     }
 }

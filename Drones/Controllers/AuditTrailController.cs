@@ -1,4 +1,5 @@
-﻿using Drones.Interfaces;
+﻿using Drones.Context;
+using Drones.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,13 @@ namespace Drones.Controllers
 
        
         private readonly IAuditTrailRepository repo;
+        private readonly ApplicationContext context;
 
-        public AuditTrailController(IAuditTrailRepository auditTrailrepository)
+        public AuditTrailController(IAuditTrailRepository auditTrailrepository, ApplicationContext _context)
         {
 
             repo = auditTrailrepository;
+            context = _context;
         }
 
 

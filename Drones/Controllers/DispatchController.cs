@@ -30,7 +30,7 @@ namespace Drones.Controllers
 
         [HttpPost]
         [Route("register-drone")]
-        public async Task<IActionResult> AddNewDrone([FromBody] DroneViewModel model)
+        public async Task<IActionResult> AddNewDrone([FromBody] DroneView model)
         {
             // Check the 
             var serialNumberLength = model.serialNumber.Length;

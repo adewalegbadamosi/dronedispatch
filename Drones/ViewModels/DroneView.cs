@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Drones.ViewModels
 {
-    public class DroneViewModel
+    public class DroneView
     {
                 
         public string serialNumber { get; set; }

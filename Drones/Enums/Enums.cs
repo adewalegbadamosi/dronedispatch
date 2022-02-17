@@ -5,18 +5,7 @@ using System.Threading.Tasks;
 
 namespace Drones.Enums
 {
-    //public enum LoanType
-    //{
-    //    [Description("Working Capital")]
-    //    WorkingCapital = 1,
-
-    //    [Description("Assest Finance")]
-    //    AssestFinance = 2,
-
-    //    [Description("Temporary Overdraft")]
-    //    TemporaryOverdraft = 3,
-    //}
-
+    
     public enum DroneModels
     {
         
