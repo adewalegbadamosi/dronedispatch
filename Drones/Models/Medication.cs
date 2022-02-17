@@ -23,6 +23,7 @@ namespace Drones.Models
 
         public int DroneId { get; set; }
 
+
     }
 
 

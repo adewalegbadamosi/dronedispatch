@@ -12,16 +12,18 @@ namespace Drones.Repository
 {
     public class AuditTrailRepository : IAuditTrailRepository
     {
-            private readonly ApplicationContext context;
+        private readonly ApplicationContext context;
+
         private readonly IConfiguration configuration;
 
         public AuditTrailRepository(ApplicationContext _context, IConfiguration _configuration)
         {
             context = _context;
+
             configuration = _configuration;
         }
 
-        public async Task<bool> AddAuditTrail(AuditViewModel model)
+        public void AddAuditTrail(AuditViewModel model)
         {
             var audit = new Audit
             {
@@ -30,17 +32,14 @@ namespace Drones.Repository
                 Detail = model.detail
             };
 
-             await context.Audits.AddAsync(audit) ;
-
-            if (await context.SaveChangesAsync() > 0) return true;
-
-            return false;
+            context.Audits.Add(audit);
 
         }
 
         public  IEnumerable<AuditViewModel> CheckDroneBatteryLevelLog()
         {
-            var batteryLevelLog = context.Audits.Select(u =>
+   
+             var batteryLevelLog = context.Audits.Select(u =>
              new AuditViewModel
              {
                  auditType = u.AuditType,
@@ -49,6 +48,8 @@ namespace Drones.Repository
                  timeCreated = u.DateTimeCreated
 
              }).ToList();
+            
+            
 
             return batteryLevelLog;
 

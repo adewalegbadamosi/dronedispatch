@@ -9,10 +9,10 @@ namespace Drones.Interfaces
 {
     public interface IDispatchRepository
     {
-        Task<string> AddDrone(DroneViewModel model);
+        Task<string> AddDrone(DroneView model);
         List<DroneDTO> GetAllDrones();
 
         Task<string> AddDefaultData();
-
+        
     }
 }
