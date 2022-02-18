@@ -8,7 +8,6 @@ namespace Drones.ViewModels
 {
     public class LoadedMedications
     {
-        //public int medicationId { get; set; }
         public string name { get; set; }
         public int weight { get; set; }        
         public string code { get; set; }
