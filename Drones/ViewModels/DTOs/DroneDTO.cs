@@ -18,7 +18,7 @@ namespace Drones.ViewModels.DTOs
         public int state { get; set; }
 
         public string stateName { get; set; }
-        //public double batteryLevel { get; set; }
+        public double batteryLevel { get; set; }
 
     }
 }

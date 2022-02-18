@@ -32,7 +32,7 @@ namespace Drones.Controllers
         [Route("register-drone")]
         public async Task<IActionResult> AddNewDrone([FromBody] DroneView model)
         {
-            // Check the 
+            // Checks and validations 
             var serialNumberLength = model.serialNumber.Length;
             if (serialNumberLength > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Maximum length of serial number is 100" });
 
@@ -41,19 +41,97 @@ namespace Drones.Controllers
 
             var batteryCapacity = model.batteryCapacity;
             if (batteryCapacity > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), cannot be more than 100" });
+            if (batteryCapacity < 25 || batteryCapacity < 0) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), cannot be less than 25" });
+
+            var modelCode = model.model;
+            if (modelCode < 1 || modelCode > 4) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Invalid model! Models code range from 1 to 4" });
 
             var response = await repo.AddDrone(model);
 
             return Ok(new
             {
-                status = true,
+                status = true,                
                 data = response
             });
+            
+                
         }
 
       
+      
+        [HttpPost]
+        [Route("load-medication")]
+        public async Task<IActionResult> LoadMedications ([FromForm] LoadedMedications model)
+        {
+           
+            if (model != null)
+            {
+                if (model.imageData.Length > 0)
+                {
+                    // load drone with medication
+                    var message = await repo.LoadingDroneWithMedication(model);
+                        
+                        // check if not null and return success message
+                    if ( message != null )
+                        return Ok(new
+                        {
+                            status = true,
+                            message = message
+                        });
+                }
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "Error loading medication." });
+        }
+
         [HttpGet]
-        [Route("get-registered-drones")]
+        [Route("check-loaded-medication-for-a-drone/{droneId}")]
+        public IActionResult GetLoadedMedicationByDrone(int droneId)
+        {
+            var response = repo.CheckLoadedMedicationsForADrone(droneId);
+
+            return Ok(new
+            {
+                status = true,
+                count = response.Count,
+                data = response
+
+            });
+        }
+
+        [HttpGet]
+        [Route("get-available-drones")]
+        public IActionResult GetAvailableDrones()
+        {
+            var response = repo.GetAvailableDrones();
+
+            return Ok(new
+            {
+                status = true,
+                count = response.Count,
+                data = response
+
+            });
+        }
+
+
+        [HttpGet]
+        [Route("check-drone-battery/{droneId}")]
+        public IActionResult GetBatteryLevelByDrone(int droneId)
+        {
+            var response = repo.CheckBatteryLevelOfADrone(droneId);
+
+            return Ok(new
+            {
+                status = true,                
+                batteryLevel = response
+
+            });
+        }
+
+        
+        [HttpGet]
+        [Route("get-all-drones")]
         public IActionResult GetAllDrones()
         {
             var response = repo.GetAllDrones();
@@ -61,7 +139,9 @@ namespace Drones.Controllers
             return Ok(new
             {
                 status = true,
+                count = response.Count,
                 data = response
+
             });
         }
 

@@ -15,7 +15,7 @@ namespace Drones.ViewModels
         public double weightLimit { get; set; }
 
         public double batteryCapacity { get; set; }
-        public int state { get; set; }
+        //public int state { get; set; }
         
         
 

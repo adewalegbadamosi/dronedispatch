@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Drones.Controllers
 {
-    [Route("api/v1/audit[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class AuditTrailController : ControllerBase
     {
@@ -26,16 +26,31 @@ namespace Drones.Controllers
 
 
         [HttpGet]
-        [Route("get-battery-levels-log")]
-        public IActionResult GetBatteryLevelsLog()
+        [Route("check-audit-trail")]
+        public IActionResult GetAllBatteryLevelsLog()
         {
-            var response = repo.CheckDroneBatteryLevelLog();
+            var response = repo.CheckAllDronesBatteryLevelLog();
 
             return Ok(new
             {
                 status = true,
+                count = response.Count(),
                 data = response
-            });
+            }); ;
         }
+
+        //[HttpGet]
+        //[Route("check-drone-battery-levels/{droneId}")]
+        //public IActionResult GetBatteryLevelLog(int droneId)
+        //{
+        //    var response = repo.CheckDroneBatteryLevelLog(droneId);
+
+        //    return Ok(new
+        //    {
+        //        status = true,
+        //        count = response.Count(),
+        //        data = response
+        //    }); ;
+        //}
     }
 }
