@@ -36,11 +36,7 @@ namespace Drones
             // Database connection
             services.AddDbContext<ApplicationContext>(opt => opt.UseInMemoryDatabase(databaseName: "DroneDispatchDb")); 
 
-            
-            //services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DbConnectionString")));
-            //var conString = Configuration.GetConnectionString("DbConnectionString");
-            //services.AddDbContext<DataContext>(options => options.UseMySql(conString, ServerVersion.AutoDetect(conString)));
-
+         
             services.AddControllers();
 
             //services.AddMvc();
@@ -80,12 +76,7 @@ namespace Drones
 
             app.UseAuthorization();
 
-            //loggerFactory.CreateLogger(Configuration.GetSection("Logging:LogLevel").Value);
-            
-
-            //var context = app.ApplicationServices.GetService<ApplicationContext>();
-            //AddTestData(context);
-
+        
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -103,13 +94,8 @@ namespace Drones
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Drones.WebApi");
 
-                // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-                //c.RoutePrefix = string.Empty;
             });
 
-           
-
-            //app.UseMvc();
         }
 
        
