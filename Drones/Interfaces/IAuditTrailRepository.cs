@@ -9,7 +9,8 @@ namespace Drones.Interfaces
 {
     public interface IAuditTrailRepository
     {
-        void AddAuditTrail(AuditViewModel model);
-        IEnumerable<AuditViewModel> CheckDroneBatteryLevelLog();
+        void AddAuditTrail(AuditTrail model);
+        IEnumerable<AuditTrail> CheckDroneBatteryLevelLog(int droneId);
+        IEnumerable<AuditTrail> CheckAllDronesBatteryLevelLog();
     }
 }

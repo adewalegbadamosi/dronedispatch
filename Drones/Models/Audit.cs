@@ -13,6 +13,8 @@ namespace Drones.Models
         public string AuditType { get; set; }        
         public string CurrentTask { get; set; }
         public string Detail { get; set; }
+        public int DroneId { get; set; }
+        public double DroneBatteryLevel { get; set; }
         public DateTime DateTimeCreated { get; set; } = DateTime.Now;
 
     }

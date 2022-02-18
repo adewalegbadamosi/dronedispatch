@@ -23,12 +23,14 @@ namespace Drones.Repository
             configuration = _configuration;
         }
 
-        public void AddAuditTrail(AuditViewModel model)
+        public void AddAuditTrail(AuditTrail model)
         {
             var audit = new Audit
             {
                 AuditType = model.auditType,
                 CurrentTask = model.task,
+                DroneId = model.droneId,
+                DroneBatteryLevel = model.droneBatteryLevel,
                 Detail = model.detail
             };
 
@@ -36,20 +38,43 @@ namespace Drones.Repository
 
         }
 
-        public  IEnumerable<AuditViewModel> CheckDroneBatteryLevelLog()
+        public  IEnumerable<AuditTrail> CheckAllDronesBatteryLevelLog()
         {
    
              var batteryLevelLog = context.Audits.Select(u =>
-             new AuditViewModel
+             new AuditTrail
              {
                  auditType = u.AuditType,
                  task = u.CurrentTask,
                  detail = u.Detail,
+                 droneId = u.DroneId,
+                 droneBatteryLevel = u.DroneBatteryLevel,
                  timeCreated = u.DateTimeCreated
 
              }).ToList();
             
             
+
+            return batteryLevelLog;
+
+        }
+
+        public IEnumerable<AuditTrail> CheckDroneBatteryLevelLog(int droneId)
+        {
+
+            var batteryLevelLog = context.Audits.Where(x => x.DroneId == droneId).Select(u =>
+            new AuditTrail
+            {
+                auditType = u.AuditType,
+                task = u.CurrentTask,
+                detail = u.Detail,
+                droneId = u.DroneId,
+                droneBatteryLevel = u.DroneBatteryLevel,
+                timeCreated = u.DateTimeCreated
+
+            }).ToList();
+
+
 
             return batteryLevelLog;
 
