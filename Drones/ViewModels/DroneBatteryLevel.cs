@@ -8,6 +8,7 @@ namespace Drones.ViewModels
     public class DroneBatteryLevel
     {
         public int droneId { get; set; }
+
         public string batteryLevel { get; set; }
 
     }

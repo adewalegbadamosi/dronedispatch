@@ -17,6 +17,9 @@ using Microsoft.EntityFrameworkCore.InMemory;
 using Drones.Models;
 using Drones.Interfaces;
 using Drones.Repository;
+using Drones.SeedDb;
+using AutoMapper;
+using Drones.Mapper;
 
 namespace Drones
 {
@@ -35,11 +38,11 @@ namespace Drones
 
             // Database connection
             services.AddDbContext<ApplicationContext>(opt => opt.UseInMemoryDatabase(databaseName: "DroneDispatchDb")); 
-
-         
+                     
             services.AddControllers();
 
-            //services.AddMvc();
+            services.AddAutoMapper(typeof(ProfileMapper));
+
 
             services.AddSwaggerGen(swagger =>
             {
@@ -49,12 +52,10 @@ namespace Drones
                     Version = "v1",
                     Title = "DronesDispatch.WebApi",
                     Description = "Api documentation for Drones Dispatch."
-                });
-               
+                });               
             });
 
             #region Repositories            
-            
             services.AddTransient<IDispatchRepository, DispatchRepository>();
             services.AddTransient<IAuditTrailRepository, AuditTrailRepository>();
             #endregion
@@ -73,17 +74,12 @@ namespace Drones
 
             app.UseRouting();
 
-
             app.UseAuthorization();
 
         
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
-                //endpoints.MapControllerRoute(
-                //    name: "default",
-                //    pattern: "{controller=Dispatch}/{action=InitializeDb}/{id?}"
-                //    );
+                endpoints.MapControllers();             
             });
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -93,14 +89,10 @@ namespace Drones
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Drones.WebApi");
-
             });
 
+            PrepDb.PrepPopulation(app, env.IsProduction());
+
         }
-
-       
-
-
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Drones.Context;
+using Drones.Enums;
 using Drones.Interfaces;
 using Drones.Models;
 using Drones.ViewModels;
@@ -31,20 +32,38 @@ namespace Drones.Controllers
             repo = dispatchrepository;
         }
 
+        [HttpGet]
+        [Route("get-drones-model")]
+        public IActionResult GetDronesModels()
+        {
+
+            return Ok(new
+            {
+                status = true,
+                data = new
+                {
+                    lightWeight = (int)DroneModels.Lightweight,
+                    middleWeight = (int)DroneModels.Middleweight,
+                    cruiseWeight = (int)DroneModels.Cruiserweight,
+                    heavyWeight = (int)DroneModels.Heavyweight
+                }
+
+            });
+        }
+
         [HttpPost]
         [Route("register-drone")]
         public async Task<IActionResult> AddNewDrone([FromBody] DroneView model)
         {
             // Checks and validations 
             var serialNumberLength = model.serialNumber.Length;
-            if (serialNumberLength > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Maximum length of serial number is 100" });
+            if (serialNumberLength > 25) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Maximum length of serial number is 25" });
 
-            var weightLimit = model.weightLimit;
-            if (weightLimit > 500) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Weight of Drone cannot be more than 500 (gr)" });
+            //var weightLimit = model.weightLimit;
+            //if (weightLimit > 500) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Weight of Drone cannot be more than 500 (gr)" });
 
             var batteryCapacity = model.batteryCapacity;
-            if (batteryCapacity > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), cannot be more than 100" });
-            if (batteryCapacity < 25 || batteryCapacity < 0) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), cannot be less than 25" });
+            if (batteryCapacity < 25 || batteryCapacity > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), can only be between 25 and 100" });
 
             var modelCode = model.model;
             if (modelCode < 1 || modelCode > 4) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Invalid model! Models code range from 1 to 4" });
@@ -73,7 +92,8 @@ namespace Drones.Controllers
                 data = response
 
             });
-        }
+        }      
+
 
         [HttpPost]
         [Route("load-medication")]
@@ -166,20 +186,34 @@ namespace Drones.Controllers
             });
         }
 
-        [HttpGet]
-        [Route("")]
-        public async Task<IActionResult> InitializeDb()
-
+        [HttpPut]
+        [Route("recharge-drone/{droneId}")]
+        public IActionResult RechargeDrone(int droneId)
         {
-
-            var response = await repo.AddDefaultData();
+            var response = repo.RechargeDrone(droneId);
 
             return Ok(new
             {
-                status = response
+                status = true,
+                data = response
 
-            }) ;
+            });
         }
-}
+
+        [HttpDelete] // Remove drone if idle, loading
+        [Route("recharge-drone/{droneId}")]
+        public IActionResult RemoveDrone(int droneId)
+        {
+            var response = repo.RemoveDrone(droneId);
+
+            return Ok(new
+            {
+                status = true,
+                data = response
+
+            });
+        }
+
+    }
 
 }
