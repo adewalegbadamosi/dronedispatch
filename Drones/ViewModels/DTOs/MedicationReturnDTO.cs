@@ -9,6 +9,7 @@ namespace Drones.ViewModels.DTOs
     {
               
         public string name { get; set; }
+
         public int weight { get; set; }
         
         public string code { get; set; }
@@ -16,6 +17,7 @@ namespace Drones.ViewModels.DTOs
         public Byte[] image { get; set; }
 
         public int droneId { get; set; }
+
         public string deliveryStatus { get; set; }
 
         public DateTime dateTimeCreated { get; set; } 

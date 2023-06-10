@@ -17,6 +17,7 @@ namespace Drones.Context
         public DbSet<Drone> Drones { get; set; }
 
         public DbSet<Medication> Medications { get; set; }
+
         public DbSet<Audit> Audits { get; set; }
 
 

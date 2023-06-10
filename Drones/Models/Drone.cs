@@ -17,11 +17,14 @@ namespace Drones.Models
 
         public int Model { get; set; }
 
-        public  double WeightLimit { get; set; }
+        public double WeightLimit { get; set; } 
 
         public double BatteryCapacity { get; set; }
+
         public int State { get; set; }
+
         public double BatteryLevel { get; set; }
+
         public DateTime DateTimeCreated { get; set; } = DateTime.Now;
 
 

@@ -9,14 +9,13 @@ namespace Drones.ViewModels
     public class LoadedMedications
     {
         public string name { get; set; }
-        public int weight { get; set; }        
+
+        public int weight { get; set; }
+        
         public string code { get; set; }
         
         public IFormFile imageData { get; set; }        
 
-        public int droneId { get; set; }
-        
-
-       
+        public int droneId { get; set; }    
     }
 }
