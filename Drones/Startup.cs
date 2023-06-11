@@ -41,7 +41,8 @@ namespace Drones
                      
             services.AddControllers();
 
-            services.AddAutoMapper(typeof(ProfileMapper));
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //services.AddAutoMapper(typeof(ProfileMapper));
 
 
             services.AddSwaggerGen(swagger =>

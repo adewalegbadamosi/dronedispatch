@@ -40,6 +40,7 @@ namespace Drones.Repository
             //Check if max fleet of 10 drones has been reached
             if (context.Drones.Count() == 10) return "New drone cannot be added, maximum fleet of 10 drones has been reached";
 
+            if (context.Drones.Any(c => c.SerialNumber == model.serialNumber)) return "Drone exist in our fleet";
 
             var newDrone = new Drone
             {
@@ -78,16 +79,11 @@ namespace Drones.Repository
             //Check for existence of the drone             
             if (context.Drones.Find(droneId) == null) return 0;
 
-            // Check if there are no medication loaded yet or existing reference to any drone
-            //if (context.Medications.Count() < 1 || context.Medications.Where( x => x.DroneId == droneId).Count() < 1)
-            //{
-            //    batteryLevel = this.auditTrail.CheckDroneBatteryLevelLog(droneId).LastOrDefault().droneBatteryLevel;
-            //    return batteryLevel;
-            //}
             //Unused drone
             if (context.Medications.Where(x => x.DroneId == droneId).Count() < 1)
             {
                 batteryLevel = this.auditTrail.CheckDroneBatteryLevelLog(droneId).LastOrDefault().droneBatteryLevel;
+
                 return batteryLevel;
             }
 
@@ -105,11 +101,11 @@ namespace Drones.Repository
             //Check if drone can be loaded
             var dronebatteryLevel = CheckBatteryLevelOfADrone(model.droneId);
 
-
             if (dronebatteryLevel < 25 || targetDrone.State != (int)DroneState.Loading) return "Selected drone is not available for loading";
 
+            if ( context.Medications.Any(c => c.Code == model.code || c.Name == model.name)) return $"Medication with code exist";
 
-            if (targetDrone.WeightLimit < model.weight) return "Overload! Drone can not carry the medication.";
+            if (targetDrone.WeightLimit < model.weight) return $"Overload! Drone has a load limit of {targetDrone.WeightLimit}.";
 
             //Getting file Extension
             var fileExtension = Path.GetExtension(model.imageData.FileName).ToLower();
@@ -143,13 +139,13 @@ namespace Drones.Repository
                     task = "Load Drone with Medication",
                     droneId = model.droneId,
                     droneBatteryLevel = this.auditTrail.CheckDroneBatteryLevelLog(model.droneId).LastOrDefault().droneBatteryLevel,
-                    detail = $"Loaded medication named: {model.name} with code number {model.code} into a drone with Id: { model.droneId}."
+                    detail = $"Loaded medication named: {model.name} with code {model.code} into a drone with Id: { model.droneId}."
                 };
 
                 this.auditTrail.AddAuditTrail(audit);
                 await context.SaveChangesAsync();
 
-                return $"Medications named: {model.name} has been loaded successfully";
+                return $"Medications named {model.name} is loaded in drone {targetDrone.SerialNumber} successfully";
             }
 
 
@@ -160,15 +156,15 @@ namespace Drones.Repository
      
         public List<MedicationReturnDTO> CheckLoadedMedicationsForADrone(int droneId)
         {
-            if( context.Medications.Count() < 1) return new List<MedicationReturnDTO>();
+            if( !context.Medications.Any(x => x.DroneId == droneId )) return null;
 
-            // First update the status of the drones and medications
-            var droneIds = context.Medications.Where(c => c.DeliveryStatus != (int)MedicationDeliveryStatus.Delivered).Select(x => x.DroneId);
+            // First update the status of the last drone with medication
+            var lastDroneId = context.Medications.Where(c => c.DroneId == droneId).Last().DroneId;
 
-            foreach (var id in droneIds)
-            {
-                this.UpdateDroneAndMedicationDeliveryStatus(id);
-            }
+            //foreach (var id in droneIds)
+            //{
+                this.UpdateDroneAndMedicationDeliveryStatus(lastDroneId);
+            //}
 
             var loadedMedications = context.Medications
                 .Where(x => x.DroneId == droneId)
@@ -190,16 +186,16 @@ namespace Drones.Repository
         public List<DroneDTO> GetAvailableDrones()
         {
             // First update the ths status of the drones
-          
-            var droneIds = context.Medications.Where(c => c.DeliveryStatus != (int)MedicationDeliveryStatus.Delivered).Select(x => x.DroneId);
 
-            foreach ( var id in droneIds)
-            {
-                this.UpdateDroneAndMedicationDeliveryStatus(id);
-            }
+            var droneIds = context.Medications.Select(x => x.DroneId);
+
+            //foreach ( var id in droneIds)
+            //{
+                this.UpdateDroneAndMedicationDeliveryStatus(droneIds.ToList());
+            //}
 
             var availableDrones = context.Drones
-                .Where(a => a.State == 1 && a.BatteryLevel > 25)
+                .Where(a => a.State == (int)DroneState.Loading && a.BatteryLevel > 25)
                 .Select(u =>  new DroneDTO
                  {
                      droneId = u.DroneId,
@@ -237,22 +233,29 @@ namespace Drones.Repository
 
             return drones;
         }
-       
+
+        public void UpdateDroneAndMedicationDeliveryStatus(List<int> droneIds)
+        {
+            foreach (var id in droneIds)
+            {
+                UpdateDroneAndMedicationDeliveryStatus(id);
+            }
+        }
+
         public double UpdateDroneAndMedicationDeliveryStatus(int droneId)
         {
             //Get reference to targets
-            //var droneStatus = this.auditTrail.CheckDroneBatteryLevelLog(droneId).LastOrDefault();
+           
+            
             Drone targetDrone = context.Drones.Find(droneId);
             Medication targetMedication = context.Medications.Where(x => x.DroneId == droneId).Last();
 
             //Update Drone status  and medication delivery status every 2 minutes
 
             var dateSpan = DateTime.Now.Subtract(targetMedication.DateTimeCreated);
-            var dateSpanMinute = (double)(dateSpan.TotalDays * 24 * 60);
+            var dateSpanMinute = (double)(dateSpan.TotalDays * 24 * 60);            
 
-            
-
-            if (targetDrone.BatteryLevel < 25)
+            if (targetDrone.BatteryLevel < 25 && targetDrone.State != (int)DroneState.Idle  )
             {
                 targetDrone.State = (int)DroneState.Idle;
             }
@@ -276,16 +279,18 @@ namespace Drones.Repository
                 {
                     targetDrone.State = (int)DroneState.Returning;
                     targetDrone.BatteryLevel = targetDrone.BatteryLevel - 10;
+                    targetMedication.DeliveryStatus = (int)MedicationDeliveryStatus.Delivered;
                 }
                 else if (dateSpanMinute >= 8 && targetDrone.State == (int)DroneState.Returning)
                 {
                     targetDrone.State = (int)DroneState.Loading;
-                
+                    targetMedication.DeliveryStatus = (int)MedicationDeliveryStatus.Delivered;
                 }
                 else if (dateSpanMinute >= 8)
                 {
                     targetDrone.State = (int)DroneState.Loading;
                     targetDrone.BatteryLevel = targetDrone.BatteryLevel - 15;
+                    targetMedication.DeliveryStatus = (int)MedicationDeliveryStatus.Delivered;
                 }
             }
 
@@ -299,7 +304,7 @@ namespace Drones.Repository
                     auditType = "Battery Level Check",
                     task = "Update Drone and Medication delivery status",
                     droneId = droneId,
-                    droneBatteryLevel = this.auditTrail.CheckDroneBatteryLevelLog(droneId).LastOrDefault().droneBatteryLevel,
+                    droneBatteryLevel = targetDrone.BatteryLevel ,
                     detail = $"Updated Drone status and medication delivery status for Drone with Id {droneId} and medication with name {targetMedication.Name} ."
                 };
 
@@ -308,9 +313,7 @@ namespace Drones.Repository
 
             }
 
-
-            return targetDrone.BatteryLevel;
-            
+            return targetDrone.BatteryLevel;            
 
         }
         public async Task<string> AddDefaultData()
@@ -353,33 +356,31 @@ namespace Drones.Repository
 
         }
 
-        public async Task<string> RechargeDrone(int droneId)
+        public string RechargeDrone(int droneId)
         {
-            Drone targetDrone = await context.Drones.FindAsync(droneId);
+            Drone targetDrone = context.Drones.Find(droneId);
 
-            if (targetDrone != null && targetDrone.BatteryLevel < 25)
+            if (targetDrone != null)
             {
-                targetDrone.BatteryLevel = targetDrone.BatteryCapacity;
-            }
+                targetDrone.BatteryLevel = targetDrone.BatteryCapacity; 
 
-            var isTargetStatusUpdated = context.SaveChanges() > 0;
-
-            if (context.SaveChanges() > 0)
-            {
-                var audit = new AuditTrail
+                if (context.SaveChanges() > 0)
                 {
-                    auditType = "Battery Recharge",
-                    task = "Recharge drone battery",
-                    droneId = droneId,
-                    droneBatteryLevel = targetDrone.BatteryLevel,
-                    detail = $"Recharged Drone with Id {droneId}."
-                };
+                    var audit = new AuditTrail
+                    {
+                        auditType = "Battery Recharge",
+                        task = "Recharge drone battery",
+                        droneId = droneId,
+                        droneBatteryLevel = targetDrone.BatteryLevel,
+                        detail = $"Recharged Drone with Id {droneId}."
+                    };
 
-                this.auditTrail.AddAuditTrail(audit);
-                context.SaveChanges();
+                    this.auditTrail.AddAuditTrail(audit);
+                    context.SaveChanges();
+                }
             }
 
-            Drone rechargedDrone = await context.Drones.FindAsync(droneId);
+            Drone rechargedDrone = context.Drones.Find(droneId);
 
             return rechargedDrone.BatteryLevel == targetDrone.BatteryCapacity ? "Battery recharged to full capacity" : "Battery recharge failed";
         }
@@ -388,19 +389,30 @@ namespace Drones.Repository
         {
             Drone drone = context.Drones.Find(droneId);
 
-            if (drone == null || drone?.State != (int)DroneState.Idle || drone?.State != (int)DroneState.Loading)
+
+            if ( drone?.State == (int)DroneState.Idle || drone?.State == (int)DroneState.Loading)
             {
-                return null;
+                context.Drones.Remove(drone);                
+
+                if (context.SaveChanges() > 0)
+                {
+                    var audit = new AuditTrail
+                    {
+                        auditType = "Drone Removal",
+                        task = "Remove a drone from the fleet",
+                        droneId = droneId,
+                        droneBatteryLevel = drone.BatteryLevel,
+                        detail = $"Removed Drone with Id {droneId}."
+                    };
+
+                    this.auditTrail.AddAuditTrail(audit);
+                    context.SaveChanges();
+                }
+
+                return _mapper.Map<DroneView>(drone);
             }
 
-            context.Drones.Remove(drone);
-            context.SaveChanges();
-
-            return _mapper.Map<DroneView>(drone);
-
+            return null;
         }
-
-
-
     }
 }

@@ -57,16 +57,14 @@ namespace Drones.Controllers
         {
             // Checks and validations 
             var serialNumberLength = model.serialNumber.Length;
-            if (serialNumberLength > 25) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Maximum length of serial number is 25" });
+            if (serialNumberLength > 25) return StatusCode(StatusCodes.Status400BadRequest, new { status = false, message = "Maximum length of serial number is 25" });
 
-            //var weightLimit = model.weightLimit;
-            //if (weightLimit > 500) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Weight of Drone cannot be more than 500 (gr)" });
-
+            
             var batteryCapacity = model.batteryCapacity;
-            if (batteryCapacity < 25 || batteryCapacity > 100) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Battery Capacity in (%), can only be between 25 and 100" });
+            if (batteryCapacity < 30 || batteryCapacity > 100) return StatusCode(StatusCodes.Status400BadRequest, new { status = false, message = "Battery Capacity in (%), can only be between 30 and 100" });
 
             var modelCode = model.model;
-            if (modelCode < 1 || modelCode > 4) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Invalid model! Models code range from 1 to 4" });
+            if (modelCode < 1 || modelCode > 4) return StatusCode(StatusCodes.Status400BadRequest, new { status = false, message = "Invalid model! Models code range from 1 to 4" });
 
             var response = await repo.AddDrone(model);
 
@@ -74,8 +72,7 @@ namespace Drones.Controllers
             {
                 status = true,                
                 data = response
-            });
-            
+            });           
                 
         }
 
@@ -106,8 +103,8 @@ namespace Drones.Controllers
                 var allowedName = @"^[a-zA-Z0-9 _-]+$";
                 var allowedCode = @"^([A-Z0-9_]+)$";
 
-                if (!Regex.IsMatch(model.name, allowedName)) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Invalid!. Name may only contain letters, numbers, ‘-‘, ‘_’" });
-                if (!Regex.IsMatch(model.code, allowedCode)) return StatusCode(StatusCodes.Status404NotFound, new { status = false, message = "Invalid!. Code may only contain upper case letters,underscore and numbers" });
+                if (!Regex.IsMatch(model.name, allowedName)) return StatusCode(StatusCodes.Status400BadRequest, new { status = false, message = "Invalid!. Name may only contain letters, numbers, ‘-‘, ‘_’" });
+                if (!Regex.IsMatch(model.code, allowedCode)) return StatusCode(StatusCodes.Status400BadRequest, new { status = false, message = "Invalid!. Code may only contain upper case letters,underscore and numbers" });
 
 
                 if (model.imageData.Length > 0)
@@ -129,7 +126,7 @@ namespace Drones.Controllers
         }
 
         [HttpGet]
-        [Route("check-loaded-medication-for-a-drone/{droneId}")]
+        [Route("check-medication-delivery-statuses/{droneId}")]
         public IActionResult GetLoadedMedicationByDrone(int droneId)
         {
             var response = repo.CheckLoadedMedicationsForADrone(droneId);
@@ -143,10 +140,9 @@ namespace Drones.Controllers
                     data = response
 
                 });
-            }
-           
+            }         
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new { status = false, message = "Server Error" });
+            return StatusCode(StatusCodes.Status200OK, new { status = false, message = "Drone or medication do not exist " });
 
         }
 
@@ -157,17 +153,13 @@ namespace Drones.Controllers
         {
             var response = repo.CheckBatteryLevelOfADrone(droneId);
 
-            if (response == 0) return Ok(new { status = false, message = "This drone has not been registered on our fleet" });
+            if (response == 0) return Ok(new { status = false, message = "This drone is not on our fleet" });
 
             return Ok(new
             {
                 status = true,                
                 batteryLevel = response
-
             });
-
-    
-
         }
 
 
@@ -201,7 +193,7 @@ namespace Drones.Controllers
         }
 
         [HttpDelete] // Remove drone if idle, loading
-        [Route("recharge-drone/{droneId}")]
+        [Route("remove-drone/{droneId}")]
         public IActionResult RemoveDrone(int droneId)
         {
             var response = repo.RemoveDrone(droneId);

@@ -16,7 +16,7 @@ namespace Drones.Interfaces
         List<DroneDTO> GetAvailableDrones();
         List<DroneDTO> GetAllDrones();
         Task<string> AddDefaultData();
-        Task<string> RechargeDrone(int droneId);
+        string RechargeDrone(int droneId);
         DroneView RemoveDrone(int droneId);
 
     }

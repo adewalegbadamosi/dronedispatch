@@ -18,6 +18,9 @@ namespace Drones.Mapper
                 .ForMember(dest => dest.batteryCapacity, opt => opt.MapFrom(src => src.BatteryCapacity));
                 //.ForMember(dest => dest.batteryCapacity, opt => opt.Ignore())
             CreateMap<Drone, DroneDTO>();
+            CreateMap<Audit, AuditTrail>()
+                .ForMember(dest => dest.task, opt => opt.MapFrom(src => src.CurrentTask)).ReverseMap();
+
 
         }
     }

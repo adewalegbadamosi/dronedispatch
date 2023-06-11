@@ -1,4 +1,5 @@
-﻿using Drones.Context;
+﻿using AutoMapper;
+using Drones.Context;
 using Drones.Interfaces;
 using Drones.Models;
 using Drones.ViewModels;
@@ -15,70 +16,39 @@ namespace Drones.Repository
         private readonly ApplicationContext context;
 
         private readonly IConfiguration configuration;
+        private readonly IMapper _mapper;
 
-        public AuditTrailRepository(ApplicationContext _context, IConfiguration _configuration)
+        public AuditTrailRepository(
+            ApplicationContext _context,
+            IConfiguration _configuration,
+            IMapper mapper)
         {
             context = _context;
 
             configuration = _configuration;
+            _mapper = mapper;
         }
 
         public void AddAuditTrail(AuditTrail model)
-        {
-            var audit = new Audit
-            {
-                AuditType = model.auditType,
-                CurrentTask = model.task,
-                DroneId = model.droneId,
-                DroneBatteryLevel = model.droneBatteryLevel,
-                Detail = model.detail
-            };
+        {         
+            var audit = _mapper.Map<Audit>(model);
 
             context.Audits.Add(audit);
-
         }
 
         public  IEnumerable<AuditTrail> CheckAllDronesBatteryLevelLog()
-        {
-   
-             var batteryLevelLog = context.Audits.Select(u =>
-             new AuditTrail
-             {
-                 auditType = u.AuditType,
-                 task = u.CurrentTask,
-                 detail = u.Detail,
-                 droneId = u.DroneId,
-                 droneBatteryLevel = u.DroneBatteryLevel,
-                 timeCreated = u.DateTimeCreated
+        {   
 
-             }).ToList();
-            
-            
+            var batteryLevelLog = context.Audits.ToList();
 
-            return batteryLevelLog;
-
+            return _mapper.Map<List<AuditTrail>>(batteryLevelLog);
         }
 
         public IEnumerable<AuditTrail> CheckDroneBatteryLevelLog(int droneId)
         {
+            var batteryLevelLog = context.Audits.Where(x => x.DroneId == droneId).ToList();
 
-            var batteryLevelLog = context.Audits.Where(x => x.DroneId == droneId).Select(u =>
-            new AuditTrail
-            {
-                auditType = u.AuditType,
-                task = u.CurrentTask,
-                detail = u.Detail,
-                droneId = u.DroneId,
-                droneBatteryLevel = u.DroneBatteryLevel,
-                timeCreated = u.DateTimeCreated
-
-            }).ToList();
-
-
-
-            return batteryLevelLog;
-
+            return _mapper.Map<List<AuditTrail>>(batteryLevelLog);
         }
-
     }
 }

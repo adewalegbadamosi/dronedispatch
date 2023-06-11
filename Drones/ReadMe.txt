@@ -12,10 +12,10 @@ This service has fleet of **drones** (maximum of 10). A drone is capable of load
 * Maximum allowable fleet is 10.
 * A drone can only load a medication per trip.
 * The  **model** of drone is mapped to Ids i.e   Lightweight = 1,   Middleweight = 2,    Cruiserweight = 3,  Heavyweight = 4 .
-* The **state** of drone is mapped to Ids i.e  Idle = 0,   Loading = 1,   Loaded = 2,   Delivering = 3,    Delivered = 4,  Returning = 5  .
+* The **state** of drone is mapped to Ids i.e  Idle = 0,   Loading = 1,   Loaded = 2,  Delivering = 3,    Delivered = 4,  Returning = 5  .
 * Medication delivery status are mapped to Ids i.e   Loaded = 1,  InTransit = 2,  Delivered = 3  .
 * After successful loading of medication, drone state changes to **Loaded**, medication delivery status changes to **Loaded** too.
-* Drone state and battery level changes in succession, at every 2 minutes or based on time of battery check (battery check drains battery life).
+* Drone state and battery level changes in succession, at every 2 minutes or based on time of battery check.
 * If battery level drop below 25% in transit, drone will complete the delivery with reserve but cannot embark on another trip except recharged.
 * Drone battery recharge to full capacity by recharging in gas station.
 * Medication delivery status changes as drone state changes
@@ -41,9 +41,9 @@ This service has fleet of **drones** (maximum of 10). A drone is capable of load
 
 
 **Note**
- This project is developed in visual studio 19 using ASP.NetCore API
+ This project is developed in visual studio 19 using ASP.NetCore
  API uses in-memory database, default data is preloaded at launch time.
- API can be tested with swagger documenation at https://localhost:5001/swagger
+ API can be tested with swagger at https://localhost:5001/swagger
 
  * In terminal, do git clone https://github.com/adewalegbadamosi/dronedispatch.git 
  * Change directory into project folder (dronedispatch)
